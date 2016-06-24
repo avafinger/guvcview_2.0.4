@@ -55,6 +55,7 @@
 #include "v4l2_controls.h"
 #include "v4l2_devices.h"
 #include "../config.h"
+#include "../guvcview/config.h"
 
 #ifndef CLEAR
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
