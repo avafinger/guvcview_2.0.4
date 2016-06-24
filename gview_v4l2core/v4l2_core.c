@@ -1365,6 +1365,7 @@ static int try_video_stream_format(v4l2_dev_t *vd,
 	assert(vd != NULL);
 
 	int ret = E_OK;
+    my_config = config_get();
 
 	/*lock the mutex*/
 	__LOCK_MUTEX( __PMUTEX );

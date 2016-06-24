@@ -30,7 +30,7 @@
 
 #include "gview.h"
 #include "v4l2_formats.h"
-// #include "../guvcview/config.h"
+#include "../guvcview/config.h"
 
 extern int verbosity;
 
@@ -195,16 +195,8 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 		uint32_t pixfmt, uint32_t width, uint32_t height,
 		int fmtind, int fsizeind)
 {
-    // config_t *my_config;
+    config_t *my_config;
 	/*assertions*/
-
-	int ret;
-	struct v4l2_frmivalenum fival;
-	int list_fps;
-
-	if(verbosity > 0)
-           printf("\t*** HACK Time interval between frame: ");
-
 	assert(vd != NULL);
 	assert(vd->fd > 0);
 	assert(vd->list_stream_formats != NULL);
@@ -212,24 +204,24 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 	assert(vd->list_stream_formats->list_stream_cap != NULL);
 	assert(vd->list_stream_formats[fmtind-1].numb_res >= fsizeind);
 
-    ret=0;
-    list_fps=0;
-    if(verbosity > 0)
-           printf("\t*** HACK Time interval between frame: ");
+	int ret=0;
+	struct v4l2_frmivalenum fival;
+	int list_fps=0;
 	memset(&fival, 0, sizeof(fival));
 	fival.index = 0;
 	fival.pixel_format = pixfmt;
 	fival.width = width;
 	fival.height = height;
 
-           
-
 	vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num = NULL;
 	vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_denom = NULL;
 
+	if(verbosity > 0)
+           printf("\t*** HACK Time interval between frame: ");
 
-    // if (my_config->cmos_camera) {
-    #if 1
+    my_config = config_get();
+
+    if (my_config->cmos_camera) {
         list_fps++;
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num = realloc(
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num,
@@ -250,9 +242,8 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num[list_fps-1] = 1;
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_denom[list_fps-1] = 25;
-    // }
-   #endif
-   #if 0
+    }
+    
     if (!my_config->cmos_camera) {
         while ((ret = xioctl(vd->fd, VIDIOC_ENUM_FRAMEINTERVALS, &fival)) == 0)
         {
@@ -329,10 +320,8 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
         else
             vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].numb_frates = list_fps;
     }
-    #endif
 	if(verbosity > 0)
 		printf("\n");
-    #if 0
     if (my_config->cmos_camera) {
         if (ret != 0 && errno != EINVAL)
         {
@@ -340,7 +329,6 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
             return errno;
         }
     }
-    #endif
 	return 0;
 }
 
@@ -390,9 +378,6 @@ static int enum_frame_sizes(v4l2_dev_t *vd, uint32_t pixfmt, int fmtind)
 				vd->list_stream_formats[fmtind-1].list_stream_cap,
 				fsizeind * sizeof(v4l2_stream_cap_t));
 
-            if(verbosity > 0)
-				printf("realloc\n");
-
 			assert(vd->list_stream_formats[fmtind-1].list_stream_cap != NULL);
 
 			vd->list_stream_formats[fmtind-1].numb_res = fsizeind;
@@ -400,17 +385,12 @@ static int enum_frame_sizes(v4l2_dev_t *vd, uint32_t pixfmt, int fmtind)
 			vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].width = fsize.discrete.width;
 			vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].height = fsize.discrete.height;
 
-            if(verbosity > 0)
-				printf("enum_frame_intervals() IN \n");
 			ret = enum_frame_intervals(vd,
 				pixfmt,
 				fsize.discrete.width,
 				fsize.discrete.height,
 				fmtind,
 				fsizeind);
-
-            if(verbosity > 0)
-				printf("enum_frame_intervals() OUT \n");
 
 			if (ret != 0)
 				fprintf(stderr, "V4L2_CORE:  Unable to enumerate frame sizes %s\n", strerror(ret));
@@ -611,9 +591,6 @@ int enum_frame_formats(v4l2_dev_t *vd)
 	}
 	vd->list_stream_formats[0].list_stream_cap = NULL;
 
-    if (verbosity > 0)
-        printf("enum_frame_formats(VIDIOC_ENUM_FMT)- \n");
-
 	while ((ret = xioctl(vd->fd, VIDIOC_ENUM_FMT, &fmt)) == 0)
 	{
 		uint8_t dec_support = can_decode_format(fmt.pixelformat);
@@ -660,15 +637,10 @@ int enum_frame_formats(v4l2_dev_t *vd)
 				pix_format & 0xFF, (pix_format >> 8) & 0xFF,
 				(pix_format >> 16) & 0xFF, (pix_format >> 24) & 0xFF);
 		strncpy(vd->list_stream_formats[fmtind-1].description, (char *) fmt.description, 31);
-
-        if (verbosity > 0)
-            printf("enum_frame_sizes - IN\n");
 		//enumerate frame sizes
 		ret = enum_frame_sizes(vd, fmt.pixelformat, fmtind);
 		if (ret != 0)
 			fprintf( stderr, "v4L2_CORE: Unable to enumerate frame sizes :%s\n", strerror(ret));
-        if (verbosity > 0)
-            printf("enum_frame_sizes - OU\n");
 		
 		if(dec_support && !ret)
 			valid_formats++; /*the format can be decoded and it has valid frame sizes*/
