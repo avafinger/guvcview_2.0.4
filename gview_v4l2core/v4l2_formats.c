@@ -194,6 +194,7 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 		uint32_t pixfmt, uint32_t width, uint32_t height,
 		int fmtind, int fsizeind)
 {
+    config_t *my_config;
 	/*assertions*/
 	assert(vd != NULL);
 	assert(vd->fd > 0);
