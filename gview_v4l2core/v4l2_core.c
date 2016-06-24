@@ -1359,6 +1359,7 @@ static int try_video_stream_format(v4l2_dev_t *vd,
 #endif    
     struct v4l2_streamparm parms;
     struct v4l2_input inp;
+    config_t *my_config;    
 
 	/*assertions*/
 	assert(vd != NULL);
