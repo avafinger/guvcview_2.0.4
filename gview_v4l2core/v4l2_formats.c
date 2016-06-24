@@ -30,7 +30,7 @@
 
 #include "gview.h"
 #include "v4l2_formats.h"
-#include "../guvcview/config.h"
+// #include "../guvcview/config.h"
 
 extern int verbosity;
 
@@ -195,7 +195,7 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 		uint32_t pixfmt, uint32_t width, uint32_t height,
 		int fmtind, int fsizeind)
 {
-    config_t *my_config;
+    // config_t *my_config;
 	/*assertions*/
 
 	int ret;
@@ -228,7 +228,8 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 	vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_denom = NULL;
 
 
-    if (my_config->cmos_camera) {
+    // if (my_config->cmos_camera) {
+    #if 1
         list_fps++;
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num = realloc(
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num,
@@ -249,8 +250,9 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num[list_fps-1] = 1;
         vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_denom[list_fps-1] = 25;
-    }
-    
+    // }
+   #endif
+   #if 0
     if (!my_config->cmos_camera) {
         while ((ret = xioctl(vd->fd, VIDIOC_ENUM_FRAMEINTERVALS, &fival)) == 0)
         {
@@ -327,8 +329,10 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
         else
             vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].numb_frates = list_fps;
     }
+    #endif
 	if(verbosity > 0)
 		printf("\n");
+    #if 0
     if (my_config->cmos_camera) {
         if (ret != 0 && errno != EINVAL)
         {
@@ -336,6 +340,7 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
             return errno;
         }
     }
+    #endif
 	return 0;
 }
 
