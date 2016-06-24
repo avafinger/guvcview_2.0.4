@@ -1389,7 +1389,7 @@ static int try_video_stream_format(v4l2_dev_t *vd,
         parms.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         parms.parm.capture.timeperframe.numerator = 1;
         parms.parm.capture.timeperframe.denominator = 25;   // start with 25 FPS
-        parms.parm.capture.capturemode = V4L2_MODE_VIDEO;
+        parms.parm.capture.capturemode = 2;
         if (-1 == xioctl(vd->fd, VIDIOC_S_PARM, &parms))
             printf("VIDIOC_S_PARM error\n");
     }
