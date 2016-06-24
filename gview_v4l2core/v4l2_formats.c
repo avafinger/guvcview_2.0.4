@@ -377,6 +377,9 @@ static int enum_frame_sizes(v4l2_dev_t *vd, uint32_t pixfmt, int fmtind)
 				vd->list_stream_formats[fmtind-1].list_stream_cap,
 				fsizeind * sizeof(v4l2_stream_cap_t));
 
+            if(verbosity > 0)
+				printf("realloc\n");
+
 			assert(vd->list_stream_formats[fmtind-1].list_stream_cap != NULL);
 
 			vd->list_stream_formats[fmtind-1].numb_res = fsizeind;
@@ -384,12 +387,17 @@ static int enum_frame_sizes(v4l2_dev_t *vd, uint32_t pixfmt, int fmtind)
 			vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].width = fsize.discrete.width;
 			vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].height = fsize.discrete.height;
 
+            if(verbosity > 0)
+				printf("enum_frame_intervals() IN \n");
 			ret = enum_frame_intervals(vd,
 				pixfmt,
 				fsize.discrete.width,
 				fsize.discrete.height,
 				fmtind,
 				fsizeind);
+
+            if(verbosity > 0)
+				printf("enum_frame_intervals() OUT \n");
 
 			if (ret != 0)
 				fprintf(stderr, "V4L2_CORE:  Unable to enumerate frame sizes %s\n", strerror(ret));
