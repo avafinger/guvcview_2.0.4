@@ -1275,7 +1275,7 @@ void *capture_loop(void *data)
 			render_frame_osd(frame->yuv_frame);
 
 			/* finally render the frame */
-			cur_fps = v4l2core_get_realfps();
+			cur_fps = v4l2core_get_realfps(vd);
             if (last_fps != cur_fps) {
                 last_fps = cur_fps;
                 if (my_options->cmos_camera)
