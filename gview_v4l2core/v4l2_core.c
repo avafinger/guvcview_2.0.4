@@ -1419,7 +1419,7 @@ static int try_video_stream_format(v4l2_dev_t *vd,
 			((vd->format.fmt.pix.pixelformat) >> 16) & 0xFF, ((vd->format.fmt.pix.pixelformat) >> 24) & 0xFF);
 
 	/*override field and type entries*/
-	vd->format.fmt.pix.field = V4L2_FIELD_ANY;
+	vd->format.fmt.pix.field = V4L2_FIELD_NONE; // V4L2_FIELD_ANY;
 	vd->format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 	ret = xioctl(vd->fd, VIDIOC_S_FMT, &vd->format);
