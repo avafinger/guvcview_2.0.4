@@ -198,14 +198,9 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
     config_t *my_config;
 	/*assertions*/
 
-	int ret=0;
+	int ret;
 	struct v4l2_frmivalenum fival;
-	int list_fps=0;
-	memset(&fival, 0, sizeof(fival));
-	fival.index = 0;
-	fival.pixel_format = pixfmt;
-	fival.width = width;
-	fival.height = height;
+	int list_fps;
 
 	if(verbosity > 0)
            printf("\t*** HACK Time interval between frame: ");
@@ -216,6 +211,17 @@ static int enum_frame_intervals(v4l2_dev_t *vd,
 	assert(vd->numb_formats >= fmtind);
 	assert(vd->list_stream_formats->list_stream_cap != NULL);
 	assert(vd->list_stream_formats[fmtind-1].numb_res >= fsizeind);
+
+    ret=0;
+    list_fps=0;
+    if(verbosity > 0)
+           printf("\t*** HACK Time interval between frame: ");
+	memset(&fival, 0, sizeof(fival));
+	fival.index = 0;
+	fival.pixel_format = pixfmt;
+	fival.width = width;
+	fival.height = height;
+
            
 
 	vd->list_stream_formats[fmtind-1].list_stream_cap[fsizeind-1].framerate_num = NULL;
