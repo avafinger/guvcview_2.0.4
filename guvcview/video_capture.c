@@ -1275,13 +1275,13 @@ void *capture_loop(void *data)
 			render_frame_osd(frame->yuv_frame);
 
 			/* finally render the frame */
-			cur_fps = v4l2core_get_realfps(vd);
+			cur_fps = v4l2core_get_realfps(my_vd);
             if (last_fps != cur_fps) {
                 last_fps = cur_fps;
                 if (my_options->cmos_camera)
-                    snprintf(render_caption, 63, "Guvcview ver:%s - %s - CMOS %dx%d (%2.2f fps) - seq: %d",  VERSION, my_options->format, v4l2core_get_frame_width(vd), v4l2core_get_frame_height(vd), cur_fps, v);
+                    snprintf(render_caption, 63, "Guvcview ver:%s - %s - CMOS %dx%d (%2.2f fps) - seq: %d",  VERSION, my_options->format, v4l2core_get_frame_width(my_vd), v4l2core_get_frame_height(my_vd), cur_fps, v);
                 else
-                    snprintf(render_caption, 63, "Guvcview ver:%s - %s - %dx%d (%2.2f fps) - seq: %d",  VERSION, my_options->format, v4l2core_get_frame_width(vd), v4l2core_get_frame_height(vd), cur_fps, v);
+                    snprintf(render_caption, 63, "Guvcview ver:%s - %s - %dx%d (%2.2f fps) - seq: %d",  VERSION, my_options->format, v4l2core_get_frame_width(my_vd), v4l2core_get_frame_height(my_vd), cur_fps, v);
                 render_set_caption(render_caption);
                 v++;
             }
