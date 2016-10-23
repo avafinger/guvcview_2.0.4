@@ -134,7 +134,7 @@ __BEGIN_DECLS
 /*
  * buffer number (for driver mmap ops)
  */
-#define NB_BUFFER 4
+#define NB_BUFFER 8 // support for 8 MP camera (BananaPi - M3)
 
 /*jpeg header def*/
 #define HEADERFRAME1 0xaf
@@ -1426,4 +1426,3 @@ uint64_t v4l2core_time_get_timestamp();
 __END_DECLS
 
 #endif
-
