@@ -1385,8 +1385,10 @@ static int try_video_stream_format(v4l2_dev_t *vd,
 	}
 
     inp.index = vd->this_device;
-    if (-1 == xioctl(vd->fd, VIDIOC_S_INPUT, &inp))
-        printf("VIDIOC_S_INPUT error!\n");
+    if (-1 == xioctl(vd->fd, VIDIOC_S_INPUT, &inp)) {
+        printf("V4L2_CORE: VIDIOC_S_INPUT error, could not set input: %d!\n", vd->this_device);
+    }
+
     if (my_config->cmos_camera) {
         CLEAR(parms);
         parms.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1415,7 +1417,8 @@ static int try_video_stream_format(v4l2_dev_t *vd,
 
 	/* make sure we set a valid format*/
 	if(verbosity > 0)
-		printf("V4L2_CORE: checking format: %c%c%c%c\n",
+		printf("V4L2_CORE: CMOS CAMERA: %d - checking format: %c%c%c%c\n",
+            my_config->cmos_camera,
 			(vd->format.fmt.pix.pixelformat) & 0xFF, ((vd->format.fmt.pix.pixelformat) >> 8) & 0xFF,
 			((vd->format.fmt.pix.pixelformat) >> 16) & 0xFF, ((vd->format.fmt.pix.pixelformat) >> 24) & 0xFF);
 
@@ -1751,7 +1754,7 @@ static void clean_v4l2_dev(v4l2_dev_t *vd)
 
 	/*close descriptor*/
 	if(vd->fd > 0)
-		v4l2_close(vd->fd);
+		close(vd->fd);
 
 	vd->fd = 0;
 
@@ -1770,7 +1773,12 @@ static void clean_v4l2_dev(v4l2_dev_t *vd)
  */
 v4l2_dev_t* v4l2core_init_dev(const char *device)
 {
-	/*assertions*/
+    struct v4l2_input inp;
+    v4l2_device_list_t *device_list;
+    v4l2_dev_t* vd;
+    char* lc_all;
+    char* lc_dir;
+    
 	assert(device != NULL);
 	
 	///*make sure to close and clean any existing device data*/
@@ -1778,14 +1786,14 @@ v4l2_dev_t* v4l2core_init_dev(const char *device)
 	//	v4l2core_close_dev();
 
 	/*localization*/
-	char* lc_all = setlocale (LC_ALL, "");
-	char* lc_dir = bindtextdomain (GETTEXT_PACKAGE_V4L2CORE, PACKAGE_LOCALE_DIR);
+	lc_all = setlocale (LC_ALL, "");
+	lc_dir = bindtextdomain (GETTEXT_PACKAGE_V4L2CORE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE_V4L2CORE, "UTF-8");
 	if (verbosity > 1) printf("V4L2_CORE: language catalog=> dir:%s type:%s cat:%s.mo\n",
 		lc_dir, lc_all, GETTEXT_PACKAGE_V4L2CORE);
 
 	/*alloc the device data*/
-	v4l2_dev_t* vd = calloc(1, sizeof(v4l2_dev_t));
+	vd = calloc(1, sizeof(v4l2_dev_t));
 
 	assert(vd != NULL);
 	
@@ -1823,7 +1831,7 @@ v4l2_dev_t* v4l2core_init_dev(const char *device)
 	vd->tilt_step = 128;
 
 	/*open device*/
-	if ((vd->fd = v4l2_open(vd->videodevice, O_RDWR | O_NONBLOCK, 0)) < 0)
+	if ((vd->fd = open(vd->videodevice, O_RDWR | O_NONBLOCK)) < 0)
 	{
 		fprintf(stderr, "V4L2_CORE: ERROR opening V4L interface: %s\n", strerror(errno));
 		clean_v4l2_dev(vd);
@@ -1834,7 +1842,15 @@ v4l2_dev_t* v4l2core_init_dev(const char *device)
 	if(vd->this_device < 0)
 		vd->this_device = 0;
 
-	v4l2_device_list_t *device_list = get_device_list();
+    inp.index = vd->this_device;
+    if(verbosity > 0)	{
+		printf("V4L2_CORE: input device %d\n",inp.index);
+	}
+    if (-1 == xioctl(vd->fd, VIDIOC_S_INPUT, &inp)) {
+        printf("V4L2_CORE: VIDIOC_S_INPUT error, could not set input: %d!\n", vd->this_device);
+    }
+
+	device_list = get_device_list();
 	
 	if(device_list && device_list->list_devices)
 		device_list->list_devices[vd->this_device].current = 1;
